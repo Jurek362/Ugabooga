@@ -1,0 +1,175 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.game-container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+#connection-status.connected {
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+#connection-status.disconnected {
+    color: #FF6B6B;
+    font-weight: bold;
+}
+
+.canvas-container {
+    margin-bottom: 20px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#gameCanvas {
+    background: #2C3E50;
+    display: block;
+    border: 3px solid #34495E;
+}
+
+.joystick-container {
+    display: none;
+    margin-top: 20px;
+}
+
+.joystick-area {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    position: relative;
+    margin: 0 auto;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: #4ECDC4;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.1s ease;
+}
+
+.joystick-knob:active {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.desktop-controls {
+    margin-top: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.desktop-controls p {
+    margin: 5px 0;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+        margin: 10px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        height: auto;
+        max-width: 350px;
+    }
+    
+    .joystick-container {
+        display: block;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-container {
+        padding: 15px 10px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .joystick-area {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .joystick-knob {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Tryb landscape dla telefonów */
+@media (orientation: landscape) and (max-height: 500px) {
+    body {
+        align-items: flex-start;
+        padding-top: 10px;
+    }
+    
+    .game-container {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    
+    .canvas-container {
+        margin-bottom: 10px;
+    }
+    
+    #gameCanvas {
+        max-height: 250px;
+    }
+  }
