@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ugabooga - Gra Multiplayer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Ugabooga Multiplayer</h1>
+        <div class="game-info">
+            <span id="player-count">Gracze online: 0</span>
+            <span id="connection-status">Łączenie...</span>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <!-- Joystick dla urządzeń mobilnych -->
+        <div class="joystick-container" id="joystick-container">
+            <div class="joystick-area" id="joystick-area">
+                <div class="joystick-knob" id="joystick-knob"></div>
+            </div>
+        </div>
+        
+        <!-- Kontrolki dla komputera -->
+        <div class="desktop-controls">
+            <p>💻 Komputer: Użyj strzałek lub WASD</p>
+            <p>📱 Telefon: Użyj joysticka na dole</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='joystick.js') }}"></script>
+    <script src="{{ url_for('static', filename='client.js') }}"></script>
+</body>
+</html>
