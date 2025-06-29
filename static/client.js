@@ -10,7 +10,6 @@ class Game {
         // Kontrola ruchu
         this.keys = {};
         this.moveSpeed = 3;
-        this.isMoving = false;
         
         this.setupSocketEvents();
         this.setupControls();
@@ -68,7 +67,6 @@ class Game {
     }
     
     setupControls() {
-        // Kontrolki klawiatury
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
         });
@@ -80,8 +78,6 @@ class Game {
     
     setupJoystick() {
         const joystickContainer = document.getElementById('joystick-container');
-        
-        // Pokaż joystick na urządzeniach dotykowych
         if ('ontouchstart' in window) {
             joystickContainer.style.display = 'block';
         }
@@ -91,14 +87,16 @@ class Game {
             (x, y) => this.handleJoystickMove(x, y)
         );
     }
-    
+
     handleJoystickMove(x, y) {
         if (!this.currentPlayer) return;
-        
+
+        // Joystick już dostarcza wektor ruchu, więc go używamy
+        // Prędkość jest mnożona, aby ruch był zauważalny
         const speed = 4;
         const newX = this.currentPlayer.x + (x * speed);
         const newY = this.currentPlayer.y + (y * speed);
-        
+
         this.updatePlayerPosition(newX, newY);
     }
     
@@ -108,12 +106,11 @@ class Game {
         let deltaX = 0;
         let deltaY = 0;
         
-        // Strzałki i WASD
         if (this.keys['arrowleft'] || this.keys['a']) deltaX = -this.moveSpeed;
         if (this.keys['arrowright'] || this.keys['d']) deltaX = this.moveSpeed;
         if (this.keys['arrowup'] || this.keys['w']) deltaY = -this.moveSpeed;
         if (this.keys['arrowdown'] || this.keys['s']) deltaY = this.moveSpeed;
-        
+
         if (deltaX !== 0 || deltaY !== 0) {
             const newX = this.currentPlayer.x + deltaX;
             const newY = this.currentPlayer.y + deltaY;
@@ -121,111 +118,55 @@ class Game {
         }
     }
     
-    updatePlayerPosition(x, y) {
-        // Ograniczenia granic
-        x = Math.max(15, Math.min(785, x));
-        y = Math.max(15, Math.min(585, y));
+    updatePlayerPosition(newX, newY) {
+        if (!this.currentPlayer) return;
+
+        // Aktualizujemy pozycję lokalnie dla płynności
+        this.currentPlayer.x = newX;
+        this.currentPlayer.y = newY;
         
-        if (this.currentPlayer.x !== x || this.currentPlayer.y !== y) {
-            this.currentPlayer.x = x;
-            this.currentPlayer.y = y;
-            
-            // Wyślij nową pozycję do serwera
-            this.socket.emit('playerMovement', { x: x, y: y });
-        }
+        // Wysyłamy nową pozycję do serwera
+        this.socket.emit('playerMove', { x: newX, y: newY });
     }
-    
-    render() {
-        // Wyczyść canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Narysuj tło siatki
-        this.drawGrid();
-        
-        // Narysuj wszystkich graczy
-        Object.values(this.players).forEach(player => {
-            this.drawPlayer(player, player.id === (this.currentPlayer?.id));
-        });
-        
-        // Narysuj informacje o grze
-        this.drawGameInfo();
-    }
-    
-    drawGrid() {
-        this.ctx.strokeStyle = '#34495E';
-        this.ctx.lineWidth = 1;
-        
-        // Pionowe linie
-        for (let x = 0; x < this.canvas.width; x += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.canvas.height);
-            this.ctx.stroke();
-        }
-        
-        // Poziome linie
-        for (let y = 0; y < this.canvas.height; y += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.canvas.width, y);
-            this.ctx.stroke();
-        }
-    }
-    
-    drawPlayer(player, isCurrentPlayer) {
-        const radius = isCurrentPlayer ? 20 : 15;
-        
-        // Cień gracza
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.beginPath();
-        this.ctx.arc(player.x + 2, player.y + 2, radius, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        // Główne koło gracza
+
+    drawPlayer(player) {
         this.ctx.fillStyle = player.color;
         this.ctx.beginPath();
-        this.ctx.arc(player.x, player.y, radius, 0, Math.PI * 2);
+        this.ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
         this.ctx.fill();
         
-        // Obramowanie
-        this.ctx.strokeStyle = isCurrentPlayer ? '#FFD700' : '#FFFFFF';
-        this.ctx.lineWidth = isCurrentPlayer ? 3 : 2;
-        this.ctx.stroke();
-        
-        // Napis "TY" dla obecnego gracza
-        if (isCurrentPlayer) {
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = 'bold 12px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('TY', player.x, player.y + 4);
-        }
-        
-        // ID gracza nad kółkiem
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '10px Arial';
+        this.ctx.fillStyle = 'white';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(`#${player.id.slice(-4)}`, player.x, player.y - radius - 5);
-    }
-    
-    drawGameInfo() {
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '16px Arial';
-        this.ctx.textAlign = 'left';
-        this.ctx.fillText(`Gracze: ${Object.keys(this.players).length}`, 10, 25);
-        
-        if (this.currentPlayer) {
-            this.ctx.fillText(`Pozycja: ${Math.round(this.currentPlayer.x)}, ${Math.round(this.currentPlayer.y)}`, 10, 45);
-        }
+        this.ctx.fillText(player.id.substring(0, 4), player.x, player.y + player.size + 10);
     }
     
     gameLoop() {
+        // Sprawdzanie ruchu z klawiatury w pętli gry
         this.handleKeyboardMovement();
-        this.render();
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        if (this.currentPlayer) {
+            // Zapisujemy stan kontekstu (przed przesunięciem)
+            this.ctx.save();
+            
+            // Przesuwamy cały świat (canvas) tak, aby gracz był na środku
+            const cameraX = this.canvas.width / 2 - this.currentPlayer.x;
+            const cameraY = this.canvas.height / 2 - this.currentPlayer.y;
+            this.ctx.translate(cameraX, cameraY);
+
+            // Rysujemy wszystkich graczy w ich globalnych koordynatach
+            for (const id in this.players) {
+                this.drawPlayer(this.players[id]);
+            }
+            
+            // Przywracamy stan kontekstu (usuwamy przesunięcie)
+            this.ctx.restore();
+        }
+        
         requestAnimationFrame(() => this.gameLoop());
     }
 }
 
-// Uruchom grę po załadowaniu strony
-document.addEventListener('DOMContentLoaded', () => {
-    new Game();
-});
+// Uruchomienie gry
+window.onload = () => new Game();
